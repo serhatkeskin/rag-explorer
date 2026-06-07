@@ -1,0 +1,22 @@
+# Frontend is deployed to Cloudflare Pages — no container needed for production.
+# This file is a placeholder for local dev or self-hosted frontend scenarios.
+#
+# To run locally:
+#   docker compose -f docker-compose.frontend.yml up
+#
+# For production, use: wrangler pages deploy frontend/out --project-name rag-explorer
+# or push to GitHub (CF Pages auto-builds from the frontend/ root directory).
+
+services:
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8001/api"
+    profiles:
+      - local

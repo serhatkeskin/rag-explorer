@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      PYTHONPATH: /app
+      DEBUG: "false"
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["sh", "-c", "cd /app/backend && python manage.py migrate --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"]
+    networks:
+      - rag-net
+
+networks:
+  rag-net:
+    external: true
+    name: rag-net
