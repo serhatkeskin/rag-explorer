@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: ghcr.io/serhatkeskin/rag-explorer/backend:${IMAGE_TAG:-latest}
     env_file: .env
     environment:
       PYTHONPATH: /app
