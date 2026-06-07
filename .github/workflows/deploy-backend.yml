@@ -9,6 +9,7 @@ on:
       - "requirements.txt"
       - "docker-compose.db.yml"
       - "docker-compose.backend.yml"
+      - ".github/workflows/deploy-backend.yml"
 
 env:
   IMAGE: ghcr.io/serhatkeskin/rag-explorer/backend
