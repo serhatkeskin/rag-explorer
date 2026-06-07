@@ -16,7 +16,9 @@ services:
       retries: 10
 
   rag-app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: .env
     depends_on:
       postgres:
@@ -25,6 +27,38 @@ services:
       - ./data:/app/data
       - ./src:/app/src
       - ./scripts:/app/scripts
+    profiles:
+      - cli
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      PYTHONPATH: /app
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./backend:/app/backend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
 
 volumes:
   pgdata:
