@@ -34,6 +34,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="site-main">
           {children}
         </div>
+        <footer className="site-footer">
+          <p>
+            Built by <a href="https://github.com/serhatkeskin" target="_blank" rel="noopener noreferrer">Serhat Keskin</a>
+            {" · "}
+            <a href="https://github.com/serhatkeskin/rag-explorer" target="_blank" rel="noopener noreferrer">GitHub</a>
+            {" · "}
+            LlamaIndex · LangGraph · Gemini · pgvector · Django · Next.js
+          </p>
+        </footer>
       </body>
     </html>
   );
