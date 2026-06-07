@@ -42,6 +42,7 @@ jobs:
           context: .
           file: backend/Dockerfile
           push: true
+          provenance: false
           tags: |
             ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
             ${{ env.IMAGE }}:latest
