@@ -23,8 +23,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           proxy_host: ${{ secrets.PROXY_HOST }}
+          proxy_port: ${{ secrets.PROXY_PORT }}
           proxy_username: ${{ secrets.PROXY_USER }}
-          proxy_key: ${{ secrets.SERVER_SSH_KEY }}
+          proxy_key: ${{ secrets.PROXY_SSH_KEY }}
           source: "backend/,src/,requirements.txt,docker-compose.db.yml,docker-compose.backend.yml"
           target: "~/rag"
           strip_components: 0
@@ -36,8 +37,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           proxy_host: ${{ secrets.PROXY_HOST }}
+          proxy_port: ${{ secrets.PROXY_PORT }}
           proxy_username: ${{ secrets.PROXY_USER }}
-          proxy_key: ${{ secrets.SERVER_SSH_KEY }}
+          proxy_key: ${{ secrets.PROXY_SSH_KEY }}
           script: |
             cd ~/rag
             docker compose -f docker-compose.db.yml -f docker-compose.backend.yml up -d --build backend
