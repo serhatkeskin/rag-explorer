@@ -21,10 +21,14 @@ export default function DocumentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  useEffect(() => { document.title = "Documents | RAG Explorer"; }, []);
+
   useEffect(() => {
     getDocuments()
       .then(setDocs)
-      .catch(console.error)
+      .catch((err) => {
+        if (err?.message === "unauthorized") setError("unauthorized");
+      })
       .finally(() => setDocsLoading(false));
   }, []);
 
@@ -135,7 +139,21 @@ export default function DocumentsPage() {
           </form>
         )}
 
-        {error && <div className="error-box" style={{ marginTop: 12 }}>⚠ {error}</div>}
+        {error && (
+          error === "unauthorized" ? (
+            <div className="token-prompt-box" style={{ marginTop: 12 }}>
+              <span>🔑 Token missing or invalid — enter a demo token to access the RAG pipeline.</span>
+              <button
+                className="token-prompt-btn"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-token-modal"))}
+              >
+                Enter Token
+              </button>
+            </div>
+          ) : (
+            <div className="error-box" style={{ marginTop: 12 }}>⚠ {error}</div>
+          )
+        )}
         {success && <div className="success-box" style={{ marginTop: 12 }}>✓ {success}</div>}
       </div>
 

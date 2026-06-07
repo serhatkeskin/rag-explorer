@@ -11,6 +11,9 @@ export default function TokenButton() {
 
   useEffect(() => {
     setTokenState(getToken());
+    const handler = () => setOpen(true);
+    window.addEventListener("open-token-modal", handler);
+    return () => window.removeEventListener("open-token-modal", handler);
   }, []);
 
   function handleSave() {

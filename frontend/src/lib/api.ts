@@ -84,6 +84,7 @@ export interface QueryResult {
 
 export async function getDocuments(): Promise<Document[]> {
   const res = await fetch(`${API_BASE}/documents/`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error("unauthorized");
   if (!res.ok) throw new Error("Failed to fetch documents");
   return res.json();
 }
@@ -94,6 +95,7 @@ export async function createDocument(title: string, content: string): Promise<Do
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ title, content }),
   });
+  if (res.status === 401) throw new Error("unauthorized");
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error ?? "Failed to create document");
@@ -110,6 +112,7 @@ export async function uploadDocument(file: File, title?: string): Promise<Docume
     headers: authHeaders(),
     body: form,
   });
+  if (res.status === 401) throw new Error("unauthorized");
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error ?? "Upload failed");
@@ -119,6 +122,7 @@ export async function uploadDocument(file: File, title?: string): Promise<Docume
 
 export async function getChunks(): Promise<ChunksResponse> {
   const res = await fetch(`${API_BASE}/chunks/`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error("unauthorized");
   if (!res.ok) throw new Error("Failed to fetch chunks");
   return res.json();
 }
@@ -129,6 +133,7 @@ export async function runQuery(query: string): Promise<QueryResult> {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ query }),
   });
+  if (res.status === 401) throw new Error("unauthorized");
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error ?? "Query failed");

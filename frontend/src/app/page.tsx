@@ -193,7 +193,21 @@ export default function QueryPage() {
 
       {loading && <PipelineSteps step={step} />}
 
-      {error && <div className="error-box">⚠ {error}</div>}
+      {error && (
+        error === "unauthorized" ? (
+          <div className="token-prompt-box">
+            <span>🔑 Token missing or invalid — enter a demo token to access the RAG pipeline.</span>
+            <button
+              className="token-prompt-btn"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-token-modal"))}
+            >
+              Enter Token
+            </button>
+          </div>
+        ) : (
+          <div className="error-box">⚠ {error}</div>
+        )
+      )}
 
       {result && step === "done" && (
         <div className="result-section">

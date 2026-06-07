@@ -3,8 +3,11 @@ import "./globals.css";
 import TokenButton from "@/components/TokenButton";
 
 export const metadata: Metadata = {
-  title: "RAG Explorer",
-  description: "Semantic document search — LlamaIndex · LangGraph · Gemini · pgvector",
+  title: {
+    default: "RAG Explorer",
+    template: "%s | RAG Explorer",
+  },
+  description: "Semantic document search powered by LlamaIndex, LangGraph, Gemini, and pgvector.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

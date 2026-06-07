@@ -10,6 +10,8 @@ export default function ChunksPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
+  useEffect(() => { document.title = "Chunks | RAG Explorer"; }, []);
+
   useEffect(() => {
     getChunks()
       .then((res) => { setChunks(res.chunks); setTotal(res.count); })
@@ -32,7 +34,21 @@ export default function ChunksPage() {
       </div>
 
       {loading && <div className="empty">Loading chunks…</div>}
-      {error && <div className="error-box">⚠ {error}</div>}
+      {error && (
+        error === "unauthorized" ? (
+          <div className="token-prompt-box">
+            <span>🔑 Token missing or invalid — enter a demo token to access the RAG pipeline.</span>
+            <button
+              className="token-prompt-btn"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-token-modal"))}
+            >
+              Enter Token
+            </button>
+          </div>
+        ) : (
+          <div className="error-box">⚠ {error}</div>
+        )
+      )}
 
       {!loading && !error && (
         <>
