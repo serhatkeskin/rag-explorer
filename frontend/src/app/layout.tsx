@@ -1,24 +1,37 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "RAG Explorer",
-  description: "LlamaIndex + Gemini + LangGraph + pgvector",
+  description: "Semantic document search — LlamaIndex · LangGraph · Gemini · pgvector",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: "monospace", maxWidth: 800, margin: "0 auto", padding: "2rem" }}>
-        <nav style={{ marginBottom: "2rem", display: "flex", gap: "1rem" }}>
-          <a href="/">Query</a>
-          <a href="/documents">Documents</a>
-          <a href="/chunks">Chunks</a>
-        </nav>
-        {children}
+      <body>
+        <header className="site-header">
+          <div className="header-inner">
+            <div className="logo">
+              <span className="logo-icon">◈</span>
+              <span className="logo-name">RAG Explorer</span>
+              <div className="tech-badges">
+                <span>LlamaIndex</span>
+                <span>LangGraph</span>
+                <span>Gemini</span>
+                <span>pgvector</span>
+              </div>
+            </div>
+            <nav className="site-nav">
+              <a href="/">Ask</a>
+              <a href="/documents">Documents</a>
+              <a href="/chunks">Chunks</a>
+            </nav>
+          </div>
+        </header>
+        <div className="site-main">
+          {children}
+        </div>
       </body>
     </html>
   );

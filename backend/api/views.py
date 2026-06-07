@@ -143,10 +143,6 @@ def chunks(request):
 
 @api_view(["POST"])
 def query(request):
-    """
-    LangGraph pipeline stays at the core.
-    Django is only the HTTP layer — run_query() drives retrieve + generate.
-    """
     serializer = QuerySerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -154,10 +150,14 @@ def query(request):
     from src.graph import run_query
 
     try:
-        answer = run_query(serializer.validated_data["query"])
+        result = run_query(serializer.validated_data["query"])
     except Exception as exc:
         return Response(
             {"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    return Response({"query": serializer.validated_data["query"], "answer": answer})
+    return Response({
+        "query": serializer.validated_data["query"],
+        "answer": result["answer"],
+        "sources": result["sources"],
+    })

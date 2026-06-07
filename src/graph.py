@@ -10,30 +10,38 @@ class RAGState(TypedDict):
     query: str
     context: str
     answer: str
+    sources: list
 
 
 def retrieve_node(state: RAGState) -> RAGState:
     retriever = get_retriever()
     nodes = retriever.retrieve(state["query"])
 
+    sources = []
     context_parts = []
     for i, node in enumerate(nodes, 1):
         context_parts.append(f"[{i}] {node.text}")
+        sources.append({
+            "text": node.text,
+            "score": round(float(node.score), 4) if node.score is not None else None,
+            "metadata": node.metadata or {},
+        })
 
     context = "\n\n".join(context_parts)
     print(f"\n--- Retrieved {len(nodes)} chunk(s) ---")
-    for part in context_parts:
-        print(part[:120] + ("..." if len(part) > 120 else ""))
+    for s in sources:
+        print(f"  [{s['score']}] {s['text'][:100]}...")
     print("---\n")
 
-    return {**state, "context": context}
+    return {**state, "context": context, "sources": sources}
 
 
 def generate_node(state: RAGState) -> RAGState:
     llm = GoogleGenAI(model=LLM_MODEL, api_key=GOOGLE_API_KEY)
 
-    prompt = f"""Answer the question using only the provided context.
-If the context does not contain enough information, say so.
+    prompt = f"""You are a helpful assistant. Answer the question using ONLY the provided context.
+If the context does not contain enough information, say so clearly.
+Be concise and direct. Use plain text, not markdown.
 
 Context:
 {state['context']}
@@ -56,8 +64,8 @@ def build_graph() -> StateGraph:
     return graph.compile()
 
 
-def run_query(query: str) -> str:
+def run_query(query: str) -> dict:
     setup_llama_settings()
     app = build_graph()
-    result = app.invoke({"query": query, "context": "", "answer": ""})
-    return result["answer"]
+    result = app.invoke({"query": query, "context": "", "answer": "", "sources": []})
+    return {"answer": result["answer"], "sources": result["sources"]}

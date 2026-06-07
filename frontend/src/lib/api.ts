@@ -20,9 +20,16 @@ export interface ChunksResponse {
   chunks: Chunk[];
 }
 
+export interface Source {
+  text: string;
+  score: number | null;
+  metadata: Record<string, string>;
+}
+
 export interface QueryResult {
   query: string;
   answer: string;
+  sources: Source[];
 }
 
 export async function getDocuments(): Promise<Document[]> {
