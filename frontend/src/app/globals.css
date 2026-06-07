@@ -27,13 +27,19 @@
   --t:           150ms ease;
 }
 
-html, body {
+html {
+  height: 100%;
+}
+
+body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
   font-size: 15px;
   line-height: 1.6;
-  min-height: 100vh;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -79,7 +85,7 @@ textarea, input, select { font-family: var(--font); }
 .site-nav a:hover { color: var(--text); background: var(--bg3); }
 
 /* ── MAIN ── */
-.site-main { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+.site-main { flex: 1; max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; width: 100%; }
 
 /* ── HERO ── */
 .hero { text-align: center; padding: 32px 0 28px; }
