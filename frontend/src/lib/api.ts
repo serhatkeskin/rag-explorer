@@ -1,10 +1,53 @@
-import { getToken } from "./auth";
+import { getToken, getAdminKey } from "./auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001/api";
 
 function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function adminHeaders(): Record<string, string> {
+  return { "X-Admin-Key": getAdminKey() };
+}
+
+export interface TokenInfo {
+  id: number;
+  token: string;
+  label: string;
+  expires_at: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export async function listTokens(): Promise<TokenInfo[]> {
+  const res = await fetch(`${API_BASE}/admin/tokens/`, { headers: adminHeaders() });
+  if (res.status === 403) throw new Error("forbidden");
+  if (!res.ok) throw new Error("Failed to fetch tokens");
+  return res.json();
+}
+
+export async function createToken(label: string, days: number): Promise<TokenInfo> {
+  const res = await fetch(`${API_BASE}/admin/tokens/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...adminHeaders() },
+    body: JSON.stringify({ label, days }),
+  });
+  if (res.status === 403) throw new Error("forbidden");
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error ?? "Failed to create token");
+  }
+  return res.json();
+}
+
+export async function deactivateToken(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/admin/tokens/${id}/`, {
+    method: "DELETE",
+    headers: adminHeaders(),
+  });
+  if (res.status === 403) throw new Error("forbidden");
+  if (!res.ok) throw new Error("Failed to deactivate token");
 }
 
 export interface Document {

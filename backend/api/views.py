@@ -1,20 +1,95 @@
 import os
 import tempfile
+from datetime import timedelta
 
+from django.conf import settings
 from django.db import connection
+from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 
-from .models import Document
+from .models import Document, DemoToken
 from .serializers import DocumentSerializer, QuerySerializer
+
+
+def _require_admin(request):
+    key = request.headers.get("X-Admin-Key", "")
+    if key != settings.ADMIN_KEY:
+        return JsonResponse({"error": "Forbidden"}, status=403)
+    return None
 
 
 @api_view(["GET"])
 def health(request):
     return Response({"status": "ok"})
+
+
+@api_view(["GET", "POST"])
+def admin_tokens(request):
+    err = _require_admin(request)
+    if err:
+        return err
+
+    if request.method == "GET":
+        tokens = DemoToken.objects.all()
+        data = [
+            {
+                "id": t.id,
+                "token": str(t.token),
+                "label": t.label,
+                "expires_at": t.expires_at.isoformat(),
+                "is_active": t.is_active,
+                "created_at": t.created_at.isoformat(),
+            }
+            for t in tokens
+        ]
+        return Response(data)
+
+    label = request.data.get("label", "").strip()
+    days = request.data.get("days")
+    if not label:
+        return Response({"error": "label required"}, status=400)
+    try:
+        days = int(days)
+        if days < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        return Response({"error": "days must be a positive integer"}, status=400)
+
+    tok = DemoToken.objects.create(
+        label=label,
+        expires_at=timezone.now() + timedelta(days=days),
+    )
+    return Response(
+        {
+            "id": tok.id,
+            "token": str(tok.token),
+            "label": tok.label,
+            "expires_at": tok.expires_at.isoformat(),
+            "is_active": tok.is_active,
+            "created_at": tok.created_at.isoformat(),
+        },
+        status=201,
+    )
+
+
+@api_view(["DELETE"])
+def admin_token_deactivate(request, pk):
+    err = _require_admin(request)
+    if err:
+        return err
+
+    try:
+        tok = DemoToken.objects.get(pk=pk)
+    except DemoToken.DoesNotExist:
+        return Response({"error": "Not found"}, status=404)
+
+    tok.is_active = False
+    tok.save(update_fields=["is_active"])
+    return Response({"id": tok.id, "is_active": False})
 
 
 def _extract_text(file) -> str:

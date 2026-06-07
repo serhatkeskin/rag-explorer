@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/">Ask</a>
               <a href="/documents">Documents</a>
               <a href="/chunks">Chunks</a>
+              <a href="/admin">Admin</a>
               <TokenButton />
             </nav>
           </div>

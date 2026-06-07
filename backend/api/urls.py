@@ -7,4 +7,6 @@ urlpatterns = [
     path("documents/upload/", views.upload_document),
     path("chunks/", views.chunks),
     path("query/", views.query),
+    path("admin/tokens/", views.admin_tokens),
+    path("admin/tokens/<int:pk>/", views.admin_token_deactivate),
 ]

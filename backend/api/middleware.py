@@ -8,12 +8,13 @@ class DemoTokenMiddleware:
     """Block requests without a valid, non-expired demo token."""
 
     EXEMPT_PATHS = {"/api/health/"}
+    EXEMPT_PREFIXES = ("/api/admin/",)
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path in self.EXEMPT_PATHS:
+        if request.path in self.EXEMPT_PATHS or any(request.path.startswith(p) for p in self.EXEMPT_PREFIXES):
             return self.get_response(request)
 
         if request.method == "OPTIONS":
