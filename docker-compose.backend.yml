@@ -19,5 +19,4 @@ services:
 
 networks:
   rag-net:
-    external: true
     name: rag-net
