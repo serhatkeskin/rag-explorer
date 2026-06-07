@@ -12,6 +12,11 @@ from .models import Document
 from .serializers import DocumentSerializer, QuerySerializer
 
 
+@api_view(["GET"])
+def health(request):
+    return Response({"status": "ok"})
+
+
 def _extract_text(file) -> str:
     """Extract plain text from an uploaded file (txt or pdf)."""
     name = getattr(file, "name", "")
@@ -53,14 +58,18 @@ def _ingest_document(document: Document) -> int:
 @api_view(["GET", "POST"])
 def documents(request):
     if request.method == "GET":
-        docs = Document.objects.all()
+        from django.db.models import Q
+        token = getattr(request, "demo_token", None)
+        docs = Document.objects.filter(
+            Q(demo_token__isnull=True) | Q(demo_token=token)
+        )
         return Response(DocumentSerializer(docs, many=True).data)
 
     serializer = DocumentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    document = serializer.save()
+    document = serializer.save(demo_token=getattr(request, "demo_token", None))
     try:
         _ingest_document(document)
         document.indexed_at = timezone.now()
@@ -103,7 +112,10 @@ def upload_document(request):
     if not content.strip():
         return Response({"error": "File has no extractable text."}, status=status.HTTP_400_BAD_REQUEST)
 
-    document = Document.objects.create(title=title, content=content)
+    document = Document.objects.create(
+        title=title, content=content,
+        demo_token=getattr(request, "demo_token", None)
+    )
     try:
         _ingest_document(document)
         document.indexed_at = timezone.now()

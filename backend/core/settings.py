@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "api.middleware.DemoTokenMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"

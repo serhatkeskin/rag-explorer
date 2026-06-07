@@ -20,7 +20,9 @@ def retrieve_node(state: RAGState) -> RAGState:
     sources = []
     context_parts = []
     for i, node in enumerate(nodes, 1):
-        context_parts.append(f"[{i}] {node.text}")
+        title = node.metadata.get("title", "") if node.metadata else ""
+        header = f"[{i}] (Source: {title})" if title else f"[{i}]"
+        context_parts.append(f"{header}\n{node.text}")
         sources.append({
             "text": node.text,
             "score": round(float(node.score), 4) if node.score is not None else None,

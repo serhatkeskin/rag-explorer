@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import TokenButton from "@/components/TokenButton";
 
 export const metadata: Metadata = {
   title: "RAG Explorer",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/">Ask</a>
               <a href="/documents">Documents</a>
               <a href="/chunks">Chunks</a>
+              <TokenButton />
             </nav>
           </div>
         </header>
