@@ -16,6 +16,7 @@ export default function RootLayout({
         <nav style={{ marginBottom: "2rem", display: "flex", gap: "1rem" }}>
           <a href="/">Query</a>
           <a href="/documents">Documents</a>
+          <a href="/chunks">Chunks</a>
         </nav>
         {children}
       </body>
