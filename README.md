@@ -2,6 +2,19 @@
 
 Dockerized RAG pipeline. Documents are embedded with Gemini and stored in pgvector. Queries run through a LangGraph pipeline: retrieve → generate.
 
+🔗 **Live demo:** [rag.projects.serhatkeskin.com](https://rag.projects.serhatkeskin.com/)
+
+## Demo
+
+A real user flow — start unauthenticated, enter an access token, add your **own**
+document, index it, then ask a question answered *only* from that document.
+
+<video src="rag-explorer-portfolio/rag-explorer-demo.mp4" controls muted loop width="100%"></video>
+
+> ▶️ If the player doesn't load inline, [watch the MP4](rag-explorer-portfolio/rag-explorer-demo.mp4) · [view the GIF](rag-explorer-portfolio/rag-explorer-demo.gif)
+
+📄 Full case study (architecture, features, screenshots): **[rag-explorer-overview.pdf](rag-explorer-portfolio/rag-explorer-overview.pdf)**
+
 ## Stack
 
 | Component | Technology |
