@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TokenButton from "@/components/TokenButton";
-import AdminNavLink from "@/components/AdminNavLink";
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +30,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/">Ask</a>
               <a href="/documents">Documents</a>
               <a href="/chunks">Chunks</a>
-              <AdminNavLink />
               <TokenButton />
             </nav>
           </div>

@@ -1,20 +1,9 @@
-from typing import TypedDict, Any
+from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from llama_index.llms.google_genai import GoogleGenAI
-from llama_index.core.vector_stores import (
-    MetadataFilter,
-    MetadataFilters,
-    FilterOperator,
-    FilterCondition,
-)
 
 from src.config import GOOGLE_API_KEY, LLM_MODEL
 from src.indexer import setup_llama_settings, get_retriever
-
-# Sentinel tag for documents not owned by any demo token (seed/default corpus).
-# Visible to every authenticated user. User-uploaded chunks are tagged with the
-# owning token's UUID, so retrieval never crosses tenants.
-DEFAULT_TAG = "__default__"
 
 
 class RAGState(TypedDict):
@@ -22,25 +11,10 @@ class RAGState(TypedDict):
     context: str
     answer: str
     sources: list
-    retriever: Any
-
-
-def build_token_filters(demo_token=None) -> MetadataFilters:
-    """Restrict retrieval to the default corpus plus the caller's own chunks."""
-    values = [DEFAULT_TAG]
-    if demo_token:
-        values.append(str(demo_token))
-    return MetadataFilters(
-        filters=[
-            MetadataFilter(key="demo_token", value=v, operator=FilterOperator.EQ)
-            for v in values
-        ],
-        condition=FilterCondition.OR,
-    )
 
 
 def retrieve_node(state: RAGState) -> RAGState:
-    retriever = state["retriever"]
+    retriever = get_retriever()
     nodes = retriever.retrieve(state["query"])
 
     sources = []
@@ -92,17 +66,8 @@ def build_graph() -> StateGraph:
     return graph.compile()
 
 
-def run_query(query: str, demo_token=None) -> dict:
+def run_query(query: str) -> dict:
     setup_llama_settings()
-    retriever = get_retriever(filters=build_token_filters(demo_token))
     app = build_graph()
-    result = app.invoke(
-        {
-            "query": query,
-            "context": "",
-            "answer": "",
-            "sources": [],
-            "retriever": retriever,
-        }
-    )
+    result = app.invoke({"query": query, "context": "", "answer": "", "sources": []})
     return {"answer": result["answer"], "sources": result["sources"]}

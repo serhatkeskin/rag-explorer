@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getChunks, deleteDocument, type Chunk } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { getChunks, type Chunk } from "@/lib/api";
 
 export default function ChunksPage() {
   const [chunks, setChunks] = useState<Chunk[]>([]);
@@ -10,13 +9,8 @@ export default function ChunksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [myToken, setMyToken] = useState("");
-  const [deletingDoc, setDeletingDoc] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = "Chunks | RAG Explorer";
-    setMyToken(getToken());
-  }, []);
+  useEffect(() => { document.title = "Chunks | RAG Explorer"; }, []);
 
   useEffect(() => {
     getChunks()
@@ -24,23 +18,6 @@ export default function ChunksPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
-
-  async function handleDeleteChunk(chunk: Chunk) {
-    const djangoId = chunk.metadata?.django_id;
-    if (!djangoId || deletingDoc) return;
-    setDeletingDoc(djangoId);
-    setError(null);
-    try {
-      await deleteDocument(parseInt(djangoId, 10));
-      // Drop every chunk that belonged to the deleted document.
-      setChunks((prev) => prev.filter((c) => c.metadata?.django_id !== djangoId));
-      setTotal((t) => Math.max(0, t - 1));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
-    } finally {
-      setDeletingDoc(null);
-    }
-  }
 
   const filtered = search.trim()
     ? chunks.filter((c) =>
@@ -102,17 +79,6 @@ export default function ChunksPage() {
                     <span className="chunk-source">📄 {chunk.metadata.title}</span>
                   )}
                   <span className="chunk-chars">{chunk.text.length} chars</span>
-                  {!!myToken && chunk.metadata?.demo_token === myToken && (
-                    <button
-                      className="btn-delete"
-                      style={{ marginLeft: "auto" }}
-                      onClick={() => handleDeleteChunk(chunk)}
-                      disabled={deletingDoc === chunk.metadata?.django_id}
-                      title="Delete your document & its chunks"
-                    >
-                      {deletingDoc === chunk.metadata?.django_id ? "Deleting…" : "Delete"}
-                    </button>
-                  )}
                 </div>
                 <p className="chunk-text">{chunk.text}</p>
               </div>

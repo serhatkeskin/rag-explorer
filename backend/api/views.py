@@ -118,19 +118,11 @@ def _ingest_document(document: Document) -> int:
     from llama_index.core import VectorStoreIndex, StorageContext
     from llama_index.core import Document as LIDocument
     from src.indexer import setup_llama_settings, get_vector_store
-    from src.graph import DEFAULT_TAG
 
     setup_llama_settings()
-    # Tag each chunk with its owning token so retrieval and chunk listing stay
-    # tenant-isolated. Seed/default docs (no token) get the shared DEFAULT_TAG.
-    demo_token_tag = str(document.demo_token.token) if document.demo_token else DEFAULT_TAG
     li_doc = LIDocument(
         text=document.content,
-        metadata={
-            "title": document.title,
-            "django_id": str(document.id),
-            "demo_token": demo_token_tag,
-        },
+        metadata={"title": document.title, "django_id": str(document.id)},
     )
     vector_store = get_vector_store()
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
@@ -146,9 +138,7 @@ def documents(request):
         docs = Document.objects.filter(
             Q(demo_token__isnull=True) | Q(demo_token=token)
         )
-        return Response(
-            DocumentSerializer(docs, many=True, context={"request": request}).data
-        )
+        return Response(DocumentSerializer(docs, many=True).data)
 
     serializer = DocumentSerializer(data=request.data)
     if not serializer.is_valid():
@@ -167,39 +157,7 @@ def documents(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return Response(
-        DocumentSerializer(document, context={"request": request}).data,
-        status=status.HTTP_201_CREATED,
-    )
-
-
-@api_view(["DELETE"])
-def document_detail(request, pk):
-    """Delete a user's own document and its pgvector chunks. Default docs are protected."""
-    token = getattr(request, "demo_token", None)
-    try:
-        doc = Document.objects.get(pk=pk)
-    except Document.DoesNotExist:
-        return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    if doc.demo_token_id is None:
-        return Response(
-            {"error": "Default documents cannot be deleted."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
-    if token is None or doc.demo_token_id != token.id:
-        return Response(
-            {"error": "You can only delete your own documents."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
-
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "DELETE FROM data_rag_docs WHERE metadata_->>'django_id' = %s",
-            [str(pk)],
-        )
-    doc.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(DocumentSerializer(document).data, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])
@@ -245,26 +203,16 @@ def upload_document(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return Response(
-        DocumentSerializer(document, context={"request": request}).data,
-        status=status.HTTP_201_CREATED,
-    )
+    return Response(DocumentSerializer(document).data, status=status.HTTP_201_CREATED)
 
 
 @api_view(["GET"])
 def chunks(request):
-    """Return indexed chunks visible to the caller: default corpus + own uploads."""
-    from src.graph import DEFAULT_TAG
-
-    token = getattr(request, "demo_token", None)
-    token_tag = str(token.token) if token else DEFAULT_TAG
+    """Return all indexed chunks from the pgvector table."""
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, text, metadata_ FROM data_rag_docs "
-                "WHERE metadata_->>'demo_token' = %s OR metadata_->>'demo_token' = %s "
-                "ORDER BY id LIMIT 500",
-                [DEFAULT_TAG, token_tag],
+                "SELECT id, text, metadata_ FROM data_rag_docs ORDER BY id LIMIT 500"
             )
             rows = cursor.fetchall()
     except Exception as exc:
@@ -288,10 +236,8 @@ def query(request):
 
     from src.graph import run_query
 
-    token = getattr(request, "demo_token", None)
-    demo_token_value = str(token.token) if token else None
     try:
-        result = run_query(serializer.validated_data["query"], demo_token=demo_token_value)
+        result = run_query(serializer.validated_data["query"])
     except Exception as exc:
         return Response(
             {"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

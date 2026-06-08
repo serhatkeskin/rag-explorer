@@ -5,7 +5,6 @@ urlpatterns = [
     path("health/", views.health),
     path("documents/", views.documents),
     path("documents/upload/", views.upload_document),
-    path("documents/<int:pk>/", views.document_detail),
     path("chunks/", views.chunks),
     path("query/", views.query),
     path("admin/tokens/", views.admin_tokens),

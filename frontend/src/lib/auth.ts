@@ -21,10 +21,8 @@ export function getAdminKey(): string {
 
 export function setAdminKey(key: string): void {
   localStorage.setItem(ADMIN_KEY, key);
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("admin-key-changed"));
 }
 
 export function clearAdminKey(): void {
   localStorage.removeItem(ADMIN_KEY);
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("admin-key-changed"));
 }
