@@ -1,11 +1,11 @@
-const BACKEND = "http://api.rag.projects.serhatkeskin.com";
+const BACKEND = "https://rag-api.projects.serhatkeskin.com";
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   const target = `${BACKEND}${url.pathname}${url.search}`;
 
   const headers = new Headers(context.request.headers);
-  headers.set("host", "api.rag.projects.serhatkeskin.com");
+  headers.set("host", "rag-api.projects.serhatkeskin.com");
 
   const init = { method: context.request.method, headers };
 
