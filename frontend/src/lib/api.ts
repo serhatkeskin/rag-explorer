@@ -57,6 +57,7 @@ export interface Document {
   created_at: string;
   indexed_at: string | null;
   chunk_count: number;
+  deletable: boolean;
 }
 
 export interface Chunk {
@@ -118,6 +119,19 @@ export async function uploadDocument(file: File, title?: string): Promise<Docume
     throw new Error(err.error ?? "Upload failed");
   }
   return res.json();
+}
+
+export async function deleteDocument(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/documents/${id}/`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (res.status === 401) throw new Error("unauthorized");
+  if (res.status === 403) throw new Error("forbidden");
+  if (!res.ok && res.status !== 204) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? "Delete failed");
+  }
 }
 
 export async function getChunks(): Promise<ChunksResponse> {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getToken, setToken, clearToken } from "@/lib/auth";
+import { getToken, setToken, clearToken, setAdminKey } from "@/lib/auth";
 
 export default function TokenButton() {
   const [token, setTokenState] = useState("");
@@ -20,9 +20,15 @@ export default function TokenButton() {
     const v = input.trim();
     if (!v) { setError("Token cannot be empty."); return; }
     const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRe.test(v)) { setError("Invalid token format (UUID expected)."); return; }
-    setToken(v);
-    setTokenState(v);
+    if (uuidRe.test(v)) {
+      // Demo access token (UUID) — grants the RAG pipeline.
+      setToken(v);
+      setTokenState(v);
+    } else {
+      // Non-UUID value is treated as an admin key. It unlocks the Admin nav link;
+      // the admin page verifies it against the backend on first use.
+      setAdminKey(v);
+    }
     setOpen(false);
     setInput("");
     setError("");
@@ -73,7 +79,7 @@ export default function TokenButton() {
           }}>
             <h3 style={{ margin: "0 0 6px", fontSize: 16, color: "var(--text1)" }}>Demo Access Token</h3>
             <p style={{ margin: "0 0 20px", fontSize: 13, color: "var(--text3)" }}>
-              Enter your demo token to access the RAG pipeline.
+              Enter your demo token to access the RAG pipeline — or an admin key to manage tokens.
             </p>
             <input
               autoFocus

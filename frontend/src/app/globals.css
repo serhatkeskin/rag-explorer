@@ -469,3 +469,17 @@ textarea, input, select { font-family: var(--font); }
 
 .error-msg { color: #ef4444; font-size: 12px; font-family: var(--mono); margin-bottom: 12px; padding: 8px 12px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); border-radius: 6px; }
 .empty-msg { color: var(--text3); font-size: 13px; padding: 24px 0; text-align: center; }
+
+.btn-delete {
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.25);
+  color: var(--red);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-delete:hover:not(:disabled) { background: rgba(248,113,113,0.16); border-color: var(--red); }
+.btn-delete:disabled { opacity: 0.55; cursor: default; }

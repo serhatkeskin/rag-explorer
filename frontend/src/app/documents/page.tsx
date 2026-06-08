@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getDocuments, createDocument, uploadDocument, type Document } from "@/lib/api";
+import { getDocuments, createDocument, uploadDocument, deleteDocument, type Document } from "@/lib/api";
 
 type Tab = "text" | "file";
 
@@ -20,6 +20,7 @@ export default function DocumentsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => { document.title = "Documents | RAG Explorer"; }, []);
 
@@ -68,6 +69,21 @@ export default function DocumentsPage() {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete(doc: Document) {
+    if (deletingId) return;
+    setDeletingId(doc.id);
+    reset();
+    try {
+      await deleteDocument(doc.id);
+      setDocs((prev) => prev.filter((d) => d.id !== doc.id));
+      setSuccess(`"${doc.title}" deleted.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -184,9 +200,21 @@ export default function DocumentsPage() {
                   {doc.content.slice(0, 120)}{doc.content.length > 120 ? "…" : ""}
                 </div>
               </div>
-              <span className={`status-badge ${doc.indexed_at ? "status-indexed" : "status-pending"}`}>
-                {doc.indexed_at ? "indexed" : "pending"}
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className={`status-badge ${doc.indexed_at ? "status-indexed" : "status-pending"}`}>
+                  {doc.indexed_at ? "indexed" : "pending"}
+                </span>
+                {doc.deletable && (
+                  <button
+                    className="btn-delete"
+                    onClick={() => handleDelete(doc)}
+                    disabled={deletingId === doc.id}
+                    title="Delete your document"
+                  >
+                    {deletingId === doc.id ? "Deleting…" : "Delete"}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
